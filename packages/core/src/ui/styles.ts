@@ -41,7 +41,7 @@ export const FORMSYNC_CSS = `
   font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
 }
 .fsync-card {
-  width: min(560px, 100%);
+  width: min(640px, 100%);
   max-height: min(80vh, 720px);
   overflow: auto;
   background: #fff;
@@ -73,6 +73,16 @@ export const FORMSYNC_CSS = `
 .fsync-diff .next { color: #0f766e; }
 .fsync-diff .err { color: #b91c1c; font-size: 12px; }
 .fsync-check { margin-right: 6px; }
+.fsync-steps { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+.fsync-step { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; }
+.fsync-step h3 { margin: 0 0 4px; font-size: 13px; }
+.fsync-step p { margin: 0 0 8px; font-size: 12px; }
+.fsync-step .fsync-pre { margin: 0; }
+.fsync-copy-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 6px; }
+.fsync-copy {
+  height: 28px; padding: 0 10px; border-radius: 6px; border: 1px solid #cbd5e1;
+  background: #fff; font: 600 11px/1 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; cursor: pointer;
+}
 `;
 
 let injected = false;

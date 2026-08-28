@@ -1,4 +1,4 @@
-import type { FillContext, FilePayload, JsonSchema, JsonValue, PageInfo, ValidationIssue } from "@formsync/core";
+import type { FillContext, FilePayload, JsonSchema, JsonValue, PageInfo, ValidationIssue } from "@kunalpanchal/formsync-core";
 
 export type SessionStatus = "queued" | "processing" | "completed" | "cancelled" | "error";
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FormSyncButton } from "@formsync/react";
+import { FormSyncButton } from "@kunalpanchal/formsync-react";
 import { demoFillers, jobSchema } from "../schemas.js";
 
 export function JobApplication() {

@@ -1,6 +1,30 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
-import type { FieldDiff, FilePayload, JsonValue } from "@formsync/core";
+import {
+  CONNECT_INSTALL_STEPS,
+  MCP_NPX_COMMAND,
+  type FieldDiff,
+  type FilePayload,
+  type JsonValue,
+} from "@kunalpanchal/formsync-core";
 import { flattenPreview } from "./preview.js";
+
+function CopyButton({ text, label }: { text: string; label: string }): ReactNode {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="fsync-copy"
+      onClick={() => {
+        void navigator.clipboard.writeText(text).then(() => {
+          setCopied(true);
+          window.setTimeout(() => setCopied(false), 1500);
+        });
+      }}
+    >
+      {copied ? "Copied" : label}
+    </button>
+  );
+}
 
 export function ConnectModal(props: {
   open: boolean;
@@ -9,34 +33,37 @@ export function ConnectModal(props: {
   onClose: () => void;
 }): ReactNode {
   if (!props.open) return null;
-  const config = `{
-  "mcpServers": {
-    "formsync": {
-      "command": "npx",
-      "args": ["-y", "@formsync/mcp-server"]
-    }
-  }
-}`;
   return (
     <div className="fsync-overlay" role="dialog" aria-modal="true" aria-labelledby="fsync-connect-title">
       <div className="fsync-card">
         <h2 id="fsync-connect-title">No AI host detected</h2>
         <p>
-          FormSync did not find a local MCP host, WebMCP surface, or browser extension. Your AI
-          never receives raw DOM access — it only returns structured JSON after you click Fill with
-          AI.
+          Install the FormSync MCP host on this computer (one time). Your assistant then fills the
+          form with JSON — it never gets the browser. After installing, click retry and ask Claude,
+          Cursor, or Codex to fill the pending FormSync form.
         </p>
-        <p>Start the local host, then retry:</p>
-        <pre className="fsync-pre">npx @formsync/mcp-server</pre>
-        <p>Or add this to Claude Desktop / Cursor MCP config:</p>
-        <pre className="fsync-pre">{config}</pre>
+        <ol className="fsync-steps">
+          {CONNECT_INSTALL_STEPS.map((step) => (
+            <li key={step.id} className="fsync-step">
+              <div className="fsync-copy-row">
+                <h3>{step.title}</h3>
+                <CopyButton text={step.code} label="Copy" />
+              </div>
+              <p>{step.hint}</p>
+              <pre className="fsync-pre">{step.code}</pre>
+            </li>
+          ))}
+        </ol>
+        <p>
+          Quick install: <code>{MCP_NPX_COMMAND}</code>
+        </p>
         {props.detail ? <p>{props.detail}</p> : null}
         <div className="fsync-actions">
           <button type="button" className="fsync-ghost" onClick={props.onClose}>
             Close
           </button>
           <button type="button" className="fsync-primary" onClick={props.onRetry}>
-            Retry connection
+            I&apos;ve installed it — retry
           </button>
         </div>
       </div>

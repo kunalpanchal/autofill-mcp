@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { makeNotification, METHODS } from "@formsync/core";
+import { makeNotification, METHODS } from "@kunalpanchal/formsync-core";
 import type { SessionStore } from "./session-store.js";
 import { readProjectContext } from "./context-reader.js";
 import { submitSessionValues } from "./rpc-handler.js";
@@ -109,7 +109,7 @@ export function createMcpServer(store: SessionStore, rootDir: string): McpServer
         await submitSessionValues(
           store,
           requestId,
-          values as Record<string, import("@formsync/core").JsonValue>,
+          values as Record<string, import("@kunalpanchal/formsync-core").JsonValue>,
           files,
           rootDir,
         );

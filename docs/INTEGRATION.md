@@ -3,7 +3,7 @@
 ## React
 
 ```tsx
-import { FormSyncButton } from "@formsync/react";
+import { FormSyncButton } from "@kunalpanchal/formsync-react";
 
 const schema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -35,7 +35,7 @@ export function LaunchForm() {
 }
 ```
 
-Omit `schema` to let `@formsync/core` infer one from `name`, `id`, labels, placeholders, and `aria-label`.
+Omit `schema` to let `@kunalpanchal/formsync-core` infer one from `name`, `id`, labels, placeholders, and `aria-label`.
 
 Custom widgets (Select2, Slate, tag inputs):
 
@@ -52,7 +52,7 @@ Custom widgets (Select2, Slate, tag inputs):
 
 ```html
 <script type="module">
-  import { autoInit } from "@formsync/web";
+  import { autoInit } from "@kunalpanchal/formsync-web";
   autoInit();
 </script>
 
@@ -64,19 +64,36 @@ Custom widgets (Select2, Slate, tag inputs):
 
 ## Pairing for end users
 
-1. Run `npx @formsync/mcp-server` (or let Claude Desktop spawn it).
+If **Fill with AI** cannot find a host, the page shows an install modal (Claude Desktop, Cursor, and Codex). It does not fail silently.
+
+1. Install the MCP host (one time), or let Claude/Cursor/Codex spawn it from config below.
 2. Optional: load `packages/extension` as an unpacked Chrome extension so the page can reach the host via `postMessage` when WebSocket is blocked.
 3. Click **Fill with AI**, review the diff, approve.
 
-Claude Desktop / Cursor config:
+Packages live on GitHub Packages, so `npx` must use that registry:
+
+```bash
+npx -y --registry=https://npm.pkg.github.com @kunalpanchal/formsync-mcp-server
+```
+
+Claude Desktop (`claude_desktop_config.json`) / Cursor (`~/.cursor/mcp.json`):
 
 ```json
 {
   "mcpServers": {
     "formsync": {
       "command": "npx",
-      "args": ["-y", "@formsync/mcp-server"]
+      "args": ["-y", "--registry=https://npm.pkg.github.com", "@kunalpanchal/formsync-mcp-server"]
     }
   }
 }
 ```
+
+Codex CLI (`~/.codex/config.toml`):
+
+```toml
+[mcp_servers.formsync]
+command = "npx"
+args = ["-y", "--registry=https://npm.pkg.github.com", "@kunalpanchal/formsync-mcp-server"]
+```
+

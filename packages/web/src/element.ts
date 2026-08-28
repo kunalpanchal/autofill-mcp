@@ -3,13 +3,15 @@ import {
   FormSyncError,
   FORMSYNC_CSS,
   SPARKLE_SVG,
+  CONNECT_INSTALL_STEPS,
+  MCP_NPX_COMMAND,
   type FieldDiff,
   type FilePayload,
   type FillContext,
   type JsonSchema,
   type JsonValue,
   type TransportPreference,
-} from "@formsync/core";
+} from "@kunalpanchal/formsync-core";
 
 function flatten(value: JsonValue | undefined): string {
   if (value === undefined || value === null) return "";
@@ -104,16 +106,28 @@ export class FormSyncButtonElement extends HTMLElement {
   private showConnect(detail: string): void {
     const overlay = document.createElement("div");
     overlay.className = "fsync-overlay";
+    const steps = CONNECT_INSTALL_STEPS.map(
+      (step) => `
+        <li class="fsync-step">
+          <div class="fsync-copy-row">
+            <h3>${escapeHtml(step.title)}</h3>
+            <button type="button" class="fsync-copy" data-copy="${escapeAttr(step.code)}">Copy</button>
+          </div>
+          <p>${escapeHtml(step.hint)}</p>
+          <pre class="fsync-pre">${escapeHtml(step.code)}</pre>
+        </li>`,
+    ).join("");
     overlay.innerHTML = `
       <style>${FORMSYNC_CSS}</style>
-      <div class="fsync-card" role="dialog" aria-modal="true">
-        <h2>No AI host detected</h2>
-        <p>Run <code>npx @formsync/mcp-server</code> or add FormSync to your Claude Desktop / Cursor MCP config.</p>
-        <pre class="fsync-pre">npx @formsync/mcp-server</pre>
-        <p>${detail}</p>
+      <div class="fsync-card" role="dialog" aria-modal="true" aria-labelledby="fsync-connect-title">
+        <h2 id="fsync-connect-title">No AI host detected</h2>
+        <p>Install the FormSync MCP host on this computer (one time). After installing, retry and ask Claude, Cursor, or Codex to fill the pending form.</p>
+        <ol class="fsync-steps">${steps}</ol>
+        <p>Quick install: <code>${escapeHtml(MCP_NPX_COMMAND)}</code></p>
+        <p>${escapeHtml(detail)}</p>
         <div class="fsync-actions">
           <button type="button" class="fsync-ghost" data-close>Close</button>
-          <button type="button" class="fsync-primary" data-retry>Retry</button>
+          <button type="button" class="fsync-primary" data-retry>I've installed it — retry</button>
         </div>
       </div>
     `;
@@ -122,6 +136,17 @@ export class FormSyncButtonElement extends HTMLElement {
       overlay.remove();
       void this.run();
     });
+    for (const btn of Array.from(overlay.querySelectorAll("[data-copy]"))) {
+      btn.addEventListener("click", () => {
+        const text = (btn as HTMLElement).getAttribute("data-copy") || "";
+        void navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "Copied";
+          window.setTimeout(() => {
+            btn.textContent = "Copy";
+          }, 1500);
+        });
+      });
+    }
     document.body.appendChild(overlay);
   }
 

@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { WebSocketServer, type WebSocket } from "ws";
-import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, makeNotification, METHODS } from "@formsync/core";
+import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, makeNotification, METHODS } from "@kunalpanchal/formsync-core";
 import { SessionStore } from "./session-store.js";
 import { createRpcHandler } from "./rpc-handler.js";
 

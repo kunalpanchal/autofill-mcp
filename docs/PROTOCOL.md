@@ -112,7 +112,7 @@ Error codes: standard JSON-RPC plus `-32001` host unavailable, `-32002` unknown 
 
 ## MCP tools (stdio)
 
-When Claude Desktop or Cursor launches `npx @formsync/mcp-server`, the same process binds `127.0.0.1:3737` and speaks MCP on stdio:
+When Claude Desktop, Cursor, or Codex launches `npx -y --registry=https://npm.pkg.github.com @kunalpanchal/formsync-mcp-server`, the same process binds `127.0.0.1:3737` and speaks MCP on stdio:
 
 - `list_pending_forms`
 - `get_form_schema`

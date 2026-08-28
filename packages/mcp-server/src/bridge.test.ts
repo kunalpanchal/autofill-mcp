@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { METHODS, makeRequest, parseMessage, isJsonRpcNotification, isJsonRpcSuccess } from "@formsync/core";
+import { METHODS, makeRequest, parseMessage, isJsonRpcNotification, isJsonRpcSuccess } from "@kunalpanchal/formsync-core";
 import { startBridge, type FormSyncBridge } from "./bridge.js";
 import { SessionStore } from "./session-store.js";
 import { mockFillFromContext } from "./context-reader.js";

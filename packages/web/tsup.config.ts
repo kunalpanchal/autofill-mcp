@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ["@formsync/core"],
+  external: ["@kunalpanchal/formsync-core"],
   treeshake: true,
   target: "es2022",
 });

@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ["react", "react-dom", "react/jsx-runtime", "@formsync/core"],
+  external: ["react", "react-dom", "react/jsx-runtime", "@kunalpanchal/formsync-core"],
   treeshake: true,
   target: "es2022",
 });

@@ -1,4 +1,4 @@
-import type { JsonValue } from "@formsync/core";
+import type { JsonValue } from "@kunalpanchal/formsync-core";
 
 export function flattenPreview(value: JsonValue | undefined): string {
   if (value === undefined || value === null) return "";

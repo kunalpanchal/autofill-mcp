@@ -28,3 +28,11 @@ export { detectAndConnect } from "./protocol/handshake.js";
 export { getModelContext, isTransportAvailable } from "./protocol/transport.js";
 
 export { FORMSYNC_CSS, injectFormSyncStyles, SPARKLE_SVG } from "./ui/styles.js";
+export {
+  FORMSYNC_PACKAGES,
+  MCP_NPX_COMMAND,
+  MCP_JSON_CONFIG,
+  MCP_CODEX_CONFIG,
+  NO_HOST_MESSAGE,
+  CONNECT_INSTALL_STEPS,
+} from "./install.js";

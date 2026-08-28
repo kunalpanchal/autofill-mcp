@@ -20,3 +20,29 @@ jobs:
       - run: pnpm --filter @formsync/demo build
       - run: pnpm --filter @formsync/demo exec playwright install --with-deps chromium
       - run: pnpm --filter @formsync/demo test:e2e
+
+  publish:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@kunalpanchal"
+      - name: Publish packages to GitHub Packages
+        run: node scripts/publish-github-packages.mjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

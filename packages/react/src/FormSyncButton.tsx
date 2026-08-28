@@ -11,7 +11,7 @@ import {
   type JsonSchema,
   type JsonValue,
   type TransportPreference,
-} from "@formsync/core";
+} from "@kunalpanchal/formsync-core";
 import { ConnectModal, DiffModal } from "./modals.js";
 
 export interface FormSyncButtonProps {

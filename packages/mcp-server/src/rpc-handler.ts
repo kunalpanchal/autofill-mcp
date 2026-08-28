@@ -14,7 +14,7 @@ import {
   type JsonValue,
   type PageInfo,
   type ValidationIssue,
-} from "@formsync/core";
+} from "@kunalpanchal/formsync-core";
 import type { SessionStore } from "./session-store.js";
 import { encodeLocalFile, mockFillFromContext, readProjectContext } from "./context-reader.js";
 

@@ -8,6 +8,7 @@ import type {
   JsonValue,
 } from "../types.js";
 import { FormSyncError } from "../types.js";
+import { NO_HOST_MESSAGE } from "../install.js";
 import { computeDiff, readCurrentValues } from "../schema/diff.js";
 import { inferSchemaFromForm } from "../schema/infer.js";
 import { formatValidationErrors, validateAgainstSchema } from "../schema/validate.js";
@@ -121,10 +122,7 @@ export class FormSyncClient {
     if (!this.transport) {
       const detection = await this.detectHost();
       if (!detection.available) {
-        throw new FormSyncError(
-          "NO_HOST",
-          "No AI host detected. Run npx @formsync/mcp-server or install the FormSync browser extension.",
-        );
+        throw new FormSyncError("NO_HOST", NO_HOST_MESSAGE);
       }
     }
 

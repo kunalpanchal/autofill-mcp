@@ -1,4 +1,4 @@
-import { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "@formsync/core";
+import { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "@kunalpanchal/formsync-core";
 import { startBridge } from "./bridge.js";
 import { connectStdio, createMcpServer } from "./mcp.js";
 

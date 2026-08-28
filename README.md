@@ -10,20 +10,20 @@ The assistant never receives raw DOM access, mouse control, or a live browser se
 
 | Package | Role |
 | --- | --- |
-| [`@formsync/core`](packages/core) | Schema inference, Ajv validation, DOM binder, JSON-RPC 2.0 client |
-| [`@formsync/react`](packages/react) | `<FormSyncButton />`, approval diff, missing-host modal |
-| [`@formsync/web`](packages/web) | `<form-sync-button>` custom element and `data-formsync` auto-init |
-| [`@formsync/mcp-server`](packages/mcp-server) | Local host: stdio MCP + `ws://127.0.0.1:3737` |
+| [`@kunalpanchal/formsync-core`](packages/core) | Schema inference, Ajv validation, DOM binder, JSON-RPC 2.0 client |
+| [`@kunalpanchal/formsync-react`](packages/react) | `<FormSyncButton />`, approval diff, missing-host modal |
+| [`@kunalpanchal/formsync-web`](packages/web) | `<form-sync-button>` custom element and `data-formsync` auto-init |
+| [`@kunalpanchal/formsync-mcp-server`](packages/mcp-server) | Local host: stdio MCP + `ws://127.0.0.1:3737` |
 | [`apps/demo`](apps/demo) | Product Hunt, GitHub repo, and job-application showcases |
 
 ## Quick start — site owners
 
 ```bash
-pnpm add @formsync/react
+pnpm add @kunalpanchal/formsync-react
 ```
 
 ```tsx
-import { FormSyncButton } from "@formsync/react";
+import { FormSyncButton } from "@kunalpanchal/formsync-react";
 
 <form id="product-hunt-form">
   <input name="projectName" />
@@ -39,7 +39,7 @@ import { FormSyncButton } from "@formsync/react";
 </form>
 ```
 
-If you omit `schema`, `@formsync/core` infers one from `name`, `id`, placeholders, `aria-label`, and `<label>` text.
+If you omit `schema`, `@kunalpanchal/formsync-core` infers one from `name`, `id`, placeholders, `aria-label`, and `<label>` text.
 
 Vanilla:
 
@@ -49,37 +49,58 @@ Vanilla:
   <form-sync-button></form-sync-button>
 </form>
 <script type="module">
-  import { autoInit } from "@formsync/web";
+  import { autoInit } from "@kunalpanchal/formsync-web";
   autoInit();
 </script>
 ```
 
 See [docs/INTEGRATION.md](docs/INTEGRATION.md) for custom widgets (Select2, Slate, file inputs).
 
-## Quick start — users (Claude Desktop / Cursor)
+Packages are published to **GitHub Packages** on every merge to `main`. Point npm at the GitHub registry for this scope (a GitHub token with `read:packages` is required):
+
+```ini
+# ~/.npmrc
+@kunalpanchal:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
+
+```bash
+pnpm add @kunalpanchal/formsync-react
+```
+
+## Quick start — form fillers (Claude / Cursor / Codex)
+
+If you click **Fill with AI** and no host is running, FormSync **asks you to install the MCP server** (it does not fail silently). The modal includes copy-paste setup for:
+
+1. A one-line install: `npx -y --registry=https://npm.pkg.github.com @kunalpanchal/formsync-mcp-server`
+2. Claude Desktop (`claude_desktop_config.json`)
+3. Cursor (`~/.cursor/mcp.json`)
+4. Codex CLI (`~/.codex/config.toml`)
+
+Then click **I've installed it — retry**, and in your assistant say “fill the pending FormSync form.”
+
+Claude Desktop / Cursor:
 
 ```json
 {
   "mcpServers": {
     "formsync": {
       "command": "npx",
-      "args": ["-y", "@formsync/mcp-server"]
+      "args": ["-y", "--registry=https://npm.pkg.github.com", "@kunalpanchal/formsync-mcp-server"]
     }
   }
 }
 ```
 
-Or run the host yourself:
+Codex CLI (`~/.codex/config.toml`):
 
-```bash
-npx @formsync/mcp-server
-# optional demo mode without an LLM:
-npx @formsync/mcp-server --serve --mock-agent
+```toml
+[mcp_servers.formsync]
+command = "npx"
+args = ["-y", "--registry=https://npm.pkg.github.com", "@kunalpanchal/formsync-mcp-server"]
 ```
 
-The process listens on **127.0.0.1:3737**. Click **Fill with AI**, then in Claude/Cursor ask it to fill the pending FormSync form (`list_pending_forms` → `read_project_context` → `fill_web_form`).
-
-Handshake order: WebMCP (`document.modelContext`) → local WebSocket → extension `postMessage` → HTTP JSON-RPC.
+The process listens on **127.0.0.1:3737**. Handshake order: WebMCP (`document.modelContext`) → local WebSocket → extension `postMessage` → HTTP JSON-RPC.
 
 Wire format: [docs/PROTOCOL.md](docs/PROTOCOL.md). Threat model: [docs/SECURITY.md](docs/SECURITY.md).
 

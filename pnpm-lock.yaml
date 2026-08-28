@@ -17,10 +17,10 @@ importers:
 
   apps/demo:
     dependencies:
-      '@formsync/core':
+      '@kunalpanchal/formsync-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@formsync/react':
+      '@kunalpanchal/formsync-react':
         specifier: workspace:*
         version: link:../../packages/react
       react:
@@ -84,7 +84,7 @@ importers:
 
   packages/mcp-server:
     dependencies:
-      '@formsync/core':
+      '@kunalpanchal/formsync-core':
         specifier: workspace:*
         version: link:../core
       '@modelcontextprotocol/sdk':
@@ -115,7 +115,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@formsync/core':
+      '@kunalpanchal/formsync-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -149,7 +149,7 @@ importers:
 
   packages/web:
     dependencies:
-      '@formsync/core':
+      '@kunalpanchal/formsync-core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

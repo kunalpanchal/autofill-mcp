@@ -1,4 +1,4 @@
-import type { JsonSchema } from "@formsync/core";
+import type { JsonSchema } from "@kunalpanchal/formsync-core";
 
 export const productHuntSchema: JsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
