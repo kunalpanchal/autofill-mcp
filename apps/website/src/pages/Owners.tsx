@@ -63,7 +63,26 @@ export function Owners() {
         Schema. The assistant never sees your DOM.
       </p>
 
-      <h2>Install from GitHub Packages</h2>
+      <h2>1. Install with a coding agent</h2>
+      <p>
+        Copy the FormSync Agent Skill into your website repo, then ask Cursor, Claude Code, Codex,
+        or any skills-compatible agent to add Fill with AI.
+      </p>
+      <CodeBlock
+        code={`mkdir -p .agents/skills/formsync
+curl -fsSL https://raw.githubusercontent.com/kunalpanchal/autofill-mcp/main/.agents/skills/formsync/SKILL.md \\
+  -o .agents/skills/formsync/SKILL.md`}
+      />
+      <p>Then prompt:</p>
+      <CodeBlock code="Add FormSync Fill with AI to the forms on this site. Follow the formsync skill." />
+      <p>
+        In Cursor you can import the skill from{" "}
+        <a href="https://github.com/kunalpanchal/autofill-mcp">github.com/kunalpanchal/autofill-mcp</a>
+        {" "}(Customize, then Skills). The skill file is{" "}
+        <code>.agents/skills/formsync/SKILL.md</code>.
+      </p>
+
+      <h2>2. Install from GitHub Packages</h2>
       <p>
         Point npm at the GitHub registry for this scope. Create a token with{" "}
         <code>read:packages</code>.

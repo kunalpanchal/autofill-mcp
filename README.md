@@ -8,17 +8,33 @@ The assistant never receives raw DOM access, mouse control, or a live browser se
 
 **Docs and live examples:** [https://kunalpanchal.github.io/autofill-mcp/](https://kunalpanchal.github.io/autofill-mcp/)
 
-## Packages
+## Quick start
 
-| Package | Role |
-| --- | --- |
-| [`@kunalpanchal/formsync-core`](packages/core) | Schema inference, Ajv validation, DOM binder, JSON-RPC 2.0 client |
-| [`@kunalpanchal/formsync-react`](packages/react) | `<FormSyncButton />`, approval diff, missing-host modal |
-| [`@kunalpanchal/formsync-web`](packages/web) | `<form-sync-button>` custom element and `data-formsync` auto-init |
-| [`@kunalpanchal/formsync-mcp-server`](packages/mcp-server) | Local host: stdio MCP + `ws://127.0.0.1:3737` |
-| [`apps/demo`](apps/demo) | Product Hunt, GitHub repo, and job-application showcases |
+### 1. Install with a coding agent (recommended)
 
-## Quick start — site owners
+Copy the FormSync [Agent Skill](https://agentskills.io) into your website repo, then ask Cursor, Claude Code, Codex, or any skills-compatible agent to add Fill with AI.
+
+```bash
+mkdir -p .agents/skills/formsync
+curl -fsSL https://raw.githubusercontent.com/kunalpanchal/autofill-mcp/main/.agents/skills/formsync/SKILL.md \
+  -o .agents/skills/formsync/SKILL.md
+```
+
+Then prompt:
+
+> Add FormSync Fill with AI to the forms on this site. Follow the formsync skill.
+
+In Cursor you can also import the skill from this GitHub repo (**Customize > Skills**, remote GitHub source: `https://github.com/kunalpanchal/autofill-mcp`). If your agent only loads `.claude/skills` or `.cursor/skills`, copy the same `SKILL.md` into `formsync/` under that directory. Canonical file: [`.agents/skills/formsync/SKILL.md`](.agents/skills/formsync/SKILL.md).
+
+### 2. Site owners (manual)
+
+Packages are published to **GitHub Packages** on every merge to `main`. Point npm at the GitHub registry for this scope (a GitHub token with `read:packages` is required):
+
+```ini
+# ~/.npmrc
+@kunalpanchal:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
 
 ```bash
 pnpm add @kunalpanchal/formsync-react
@@ -58,19 +74,7 @@ Vanilla:
 
 See [docs/INTEGRATION.md](docs/INTEGRATION.md) for custom widgets (Select2, Slate, file inputs).
 
-Packages are published to **GitHub Packages** on every merge to `main`. Point npm at the GitHub registry for this scope (a GitHub token with `read:packages` is required):
-
-```ini
-# ~/.npmrc
-@kunalpanchal:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-```
-
-```bash
-pnpm add @kunalpanchal/formsync-react
-```
-
-## Quick start — form fillers (Claude / Cursor / Codex)
+### 3. Form fillers (Claude / Cursor / Codex)
 
 If you click **Fill with AI** and no host is running, FormSync **asks you to install the MCP server** (it does not fail silently). The modal includes copy-paste setup for:
 
@@ -79,7 +83,7 @@ If you click **Fill with AI** and no host is running, FormSync **asks you to ins
 3. Cursor (`~/.cursor/mcp.json`)
 4. Codex CLI (`~/.codex/config.toml`)
 
-Then click **I've installed it — retry**, and in your assistant say “fill the pending FormSync form.”
+Then click **I've installed it. Retry**, and in your assistant say “fill the pending FormSync form.”
 
 Claude Desktop / Cursor:
 
@@ -105,6 +109,16 @@ args = ["-y", "--registry=https://npm.pkg.github.com", "@kunalpanchal/formsync-m
 The process listens on **127.0.0.1:3737**. Handshake order: WebMCP (`document.modelContext`) → local WebSocket → extension `postMessage` → HTTP JSON-RPC.
 
 Wire format: [docs/PROTOCOL.md](docs/PROTOCOL.md). Threat model: [docs/SECURITY.md](docs/SECURITY.md).
+
+## Packages
+
+| Package | Role |
+| --- | --- |
+| [`@kunalpanchal/formsync-core`](packages/core) | Schema inference, Ajv validation, DOM binder, JSON-RPC 2.0 client |
+| [`@kunalpanchal/formsync-react`](packages/react) | `<FormSyncButton />`, approval diff, missing-host modal |
+| [`@kunalpanchal/formsync-web`](packages/web) | `<form-sync-button>` custom element and `data-formsync` auto-init |
+| [`@kunalpanchal/formsync-mcp-server`](packages/mcp-server) | Local host: stdio MCP + `ws://127.0.0.1:3737` |
+| [`apps/demo`](apps/demo) | Product Hunt, GitHub repo, and job-application showcases |
 
 ## Security principles
 

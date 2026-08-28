@@ -1,5 +1,7 @@
 # Site owner integration
 
+**First step:** copy [`.agents/skills/formsync/SKILL.md`](../.agents/skills/formsync/SKILL.md) into your website repo and ask a coding agent to add Fill with AI. Manual steps are below.
+
 ## React
 
 ```tsx
