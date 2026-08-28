@@ -25,7 +25,7 @@ test("shows the connect modal when no AI host is configured", async ({ page }) =
   await page.getByTestId("offline-toggle").check();
   await page.getByRole("button", { name: "Fill with AI" }).click();
   await expect(page.getByRole("dialog", { name: "No AI host detected" })).toBeVisible();
-  await expect(page.getByText("npx @formsync/mcp-server")).toBeVisible();
+  await expect(page.getByText("npx @formsync/mcp-server", { exact: true })).toBeVisible();
 });
 
 test("user can reject suggested values", async ({ page }) => {
