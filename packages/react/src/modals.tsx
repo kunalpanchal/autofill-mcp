@@ -2,11 +2,12 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import {
   CONNECT_INSTALL_STEPS,
   MCP_NPX_COMMAND,
+  injectFormSyncStyles,
   type FieldDiff,
   type FilePayload,
   type JsonValue,
 } from "@kunalpanchal/formsync-core";
-import { flattenPreview } from "./preview.js";
+import { flattenPreview, parseProposedValue } from "./preview.js";
 
 function CopyButton({ text, label }: { text: string; label: string }): ReactNode {
   const [copied, setCopied] = useState(false);
@@ -31,7 +32,13 @@ export function ConnectModal(props: {
   detail?: string;
   onRetry: () => void;
   onClose: () => void;
+  /** Skip injecting default CSS. Class names stay so you can theme `.fsync-*`. */
+  unstyled?: boolean;
 }): ReactNode {
+  useEffect(() => {
+    if (props.open && !props.unstyled) injectFormSyncStyles();
+  }, [props.open, props.unstyled]);
+
   if (!props.open) return null;
   return (
     <div className="fsync-overlay" role="dialog" aria-modal="true" aria-labelledby="fsync-connect-title">
@@ -77,10 +84,15 @@ export function DiffModal(props: {
   files: FilePayload[];
   onCancel: () => void;
   onConfirm: (values: Record<string, JsonValue>) => void;
+  unstyled?: boolean;
 }): ReactNode {
   const [included, setIncluded] = useState<Record<string, boolean>>({});
   const [edits, setEdits] = useState<Record<string, string>>({});
   const titleId = useId();
+
+  useEffect(() => {
+    if (props.open && !props.unstyled) injectFormSyncStyles();
+  }, [props.open, props.unstyled]);
 
   useEffect(() => {
     const nextInc: Record<string, boolean> = {};
@@ -162,7 +174,7 @@ export function DiffModal(props: {
               for (const d of props.diffs) {
                 if (!(included[d.field] ?? true)) continue;
                 const raw = edits[d.field] ?? flattenPreview(d.next);
-                values[d.field] = coerce(d.next, raw);
+                values[d.field] = parseProposedValue(d.next, raw);
               }
               props.onConfirm(values);
             }}
@@ -173,16 +185,4 @@ export function DiffModal(props: {
       </div>
     </div>
   );
-}
-
-function coerce(original: JsonValue | undefined, raw: string): JsonValue {
-  if (typeof original === "boolean") return raw === "true" || raw === "on";
-  if (typeof original === "number") return Number(raw);
-  if (Array.isArray(original)) {
-    return raw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-  return raw;
 }

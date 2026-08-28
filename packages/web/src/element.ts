@@ -22,7 +22,7 @@ function flatten(value: JsonValue | undefined): string {
 
 export class FormSyncButtonElement extends HTMLElement {
   static get observedAttributes(): string[] {
-    return ["target-form", "label", "require-approval"];
+    return ["target-form", "label", "require-approval", "unstyled", "headless"];
   }
 
   private root: ShadowRoot;
@@ -30,20 +30,43 @@ export class FormSyncButtonElement extends HTMLElement {
   schema: JsonSchema | undefined;
   context: FillContext | undefined;
   transports: TransportPreference[] | undefined;
+  private pendingDiff: {
+    resolve: (v: boolean | Record<string, JsonValue>) => void;
+  } | null = null;
 
   constructor() {
     super();
     this.root = this.attachShadow({ mode: "open" });
+    this.renderChrome();
+  }
+
+  private isUnstyled(): boolean {
+    return this.hasAttribute("unstyled");
+  }
+
+  private isHeadless(): boolean {
+    return this.hasAttribute("headless");
+  }
+
+  private renderChrome(): void {
+    const style = this.isUnstyled()
+      ? `:host { display: inline-block; } button { font: inherit; }`
+      : `${FORMSYNC_CSS}
+        :host { display: inline-block; }`;
     this.root.innerHTML = `
-      <style>${FORMSYNC_CSS}
-        :host { display: inline-block; }
-      </style>
-      <button type="button" class="fsync-btn" part="button">
-        ${SPARKLE_SVG}
-        <span class="fsync-btn__label">Fill with AI</span>
+      <style>${style}</style>
+      <button type="button" class="${this.isUnstyled() ? "" : "fsync-btn"}" part="button">
+        ${this.isUnstyled() ? "" : SPARKLE_SVG}
+        <span class="fsync-btn__label" part="label"><slot></slot></span>
+        <span class="fsync-btn__status" part="status" hidden></span>
       </button>
     `;
-    this.root.querySelector("button")?.addEventListener("click", () => void this.run());
+    const button = this.root.querySelector("button");
+    button?.addEventListener("click", () => void this.fill());
+    if (this.isHeadless()) {
+      this.style.display = "contents";
+      if (button) button.hidden = true;
+    }
   }
 
   get targetForm(): string {
@@ -53,11 +76,25 @@ export class FormSyncButtonElement extends HTMLElement {
   }
 
   connectedCallback(): void {
-    const label = this.getAttribute("label");
-    if (label) {
-      const span = this.root.querySelector(".fsync-btn__label");
-      if (span) span.textContent = label;
+    this.syncLabel();
+    if (this.isHeadless()) {
+      const button = this.root.querySelector("button");
+      if (button) button.hidden = true;
     }
+  }
+
+  attributeChangedCallback(name: string): void {
+    if (name === "label") this.syncLabel();
+    if (name === "unstyled" || name === "headless") this.renderChrome();
+  }
+
+  private syncLabel(): void {
+    const slot = this.root.querySelector("slot");
+    if (!slot) return;
+    const assigned = slot.assignedNodes().filter((n) => n.textContent?.trim());
+    if (assigned.length) return;
+    const label = this.getAttribute("label") || "Fill with AI";
+    slot.textContent = label;
   }
 
   private resolveTarget(): string | HTMLFormElement {
@@ -68,44 +105,90 @@ export class FormSyncButtonElement extends HTMLElement {
     throw new Error("form-sync-button needs target-form or must live inside a <form>");
   }
 
+  /** Public so a host button can drive a headless element. */
+  fill(): Promise<void> {
+    return this.run();
+  }
+
+  approve(values: Record<string, JsonValue>): void {
+    this.pendingDiff?.resolve(values);
+    this.pendingDiff = null;
+  }
+
+  reject(): void {
+    this.pendingDiff?.resolve(false);
+    this.pendingDiff = null;
+  }
+
   async run(): Promise<void> {
-    const button = this.root.querySelector("button")!;
-    const label = this.root.querySelector(".fsync-btn__label")!;
-    button.disabled = true;
-    button.classList.add("fsync-btn--busy");
-    label.textContent = "Filling…";
-    this.client ??= new FormSyncClient({ transports: this.transports ?? ["webmcp", "websocket", "postmessage", "http"] });
+    const button = this.root.querySelector("button");
+    const labelEl = this.root.querySelector(".fsync-btn__label") as HTMLElement | null;
+    const statusEl = this.root.querySelector(".fsync-btn__status") as HTMLElement | null;
+    if (button) {
+      button.disabled = true;
+      button.classList.add("fsync-btn--busy");
+    }
+    if (labelEl) labelEl.hidden = true;
+    if (statusEl) {
+      statusEl.hidden = false;
+      statusEl.textContent = "Filling…";
+    }
+    this.client ??= new FormSyncClient({
+      transports: this.transports ?? ["webmcp", "websocket", "postmessage", "http"],
+    });
     try {
       const outcome = await this.client.fill({
         targetForm: this.resolveTarget(),
         schema: this.schema,
         context: this.context,
         onProgress: (_s, message) => {
-          label.textContent = message.slice(0, 40);
+          this.dispatchEvent(new CustomEvent("formsync-progress", { detail: { message }, bubbles: true }));
+          if (statusEl) statusEl.textContent = message.slice(0, 40);
         },
         onApprove: async (diffs, values, files) => {
           if (this.getAttribute("require-approval") === "false") return true;
+          const ev = new CustomEvent("formsync-diff", {
+            detail: { diffs, values, files },
+            bubbles: true,
+            cancelable: true,
+          });
+          if (!this.dispatchEvent(ev)) {
+            return await new Promise<boolean | Record<string, JsonValue>>((resolve) => {
+              this.pendingDiff = { resolve };
+            });
+          }
           return await this.showDiff(diffs, values, files);
         },
       });
       this.dispatchEvent(new CustomEvent("formsync-success", { detail: outcome.values, bubbles: true }));
-      label.textContent = this.getAttribute("label") || "Fill with AI";
     } catch (err) {
       if (err instanceof FormSyncError && err.code === "NO_HOST") {
-        this.showConnect(err.message);
+        const ev = new CustomEvent("formsync-connect", {
+          detail: { message: err.message },
+          bubbles: true,
+          cancelable: true,
+        });
+        if (this.dispatchEvent(ev)) this.showConnect(err.message);
       } else if (!(err instanceof FormSyncError && err.code === "REJECTED")) {
         this.dispatchEvent(new CustomEvent("formsync-error", { detail: err, bubbles: true }));
       }
-      label.textContent = this.getAttribute("label") || "Fill with AI";
     } finally {
-      button.disabled = false;
-      button.classList.remove("fsync-btn--busy");
+      if (button) {
+        button.disabled = false;
+        button.classList.remove("fsync-btn--busy");
+      }
+      if (labelEl) labelEl.hidden = false;
+      if (statusEl) {
+        statusEl.hidden = true;
+        statusEl.textContent = "";
+      }
     }
   }
 
   private showConnect(detail: string): void {
     const overlay = document.createElement("div");
     overlay.className = "fsync-overlay";
+    overlay.setAttribute("part", "overlay");
     const steps = CONNECT_INSTALL_STEPS.map(
       (step) => `
         <li class="fsync-step">
@@ -118,8 +201,8 @@ export class FormSyncButtonElement extends HTMLElement {
         </li>`,
     ).join("");
     overlay.innerHTML = `
-      <style>${FORMSYNC_CSS}</style>
-      <div class="fsync-card" role="dialog" aria-modal="true" aria-labelledby="fsync-connect-title">
+      <style>${this.isUnstyled() ? "" : FORMSYNC_CSS}</style>
+      <div class="fsync-card" role="dialog" aria-modal="true" aria-labelledby="fsync-connect-title" part="card">
         <h2 id="fsync-connect-title">No AI host detected</h2>
         <p>Install the FormSync MCP host on this computer (one time). After installing, retry and ask Claude, Cursor, or Codex to fill the pending form.</p>
         <ol class="fsync-steps">${steps}</ol>
@@ -158,6 +241,7 @@ export class FormSyncButtonElement extends HTMLElement {
     return new Promise((resolve) => {
       const overlay = document.createElement("div");
       overlay.className = "fsync-overlay";
+      overlay.setAttribute("part", "overlay");
       const rows = diffs
         .map(
           (d) => `
@@ -170,8 +254,8 @@ export class FormSyncButtonElement extends HTMLElement {
         )
         .join("");
       overlay.innerHTML = `
-        <style>${FORMSYNC_CSS}</style>
-        <div class="fsync-card" role="dialog" aria-modal="true">
+        <style>${this.isUnstyled() ? "" : FORMSYNC_CSS}</style>
+        <div class="fsync-card" role="dialog" aria-modal="true" part="card">
           <h2>Review AI values</h2>
           <p>Approve the fields that should be written into the form.</p>
           <table class="fsync-diff">

@@ -82,9 +82,11 @@ Custom widgets (Select2, Slate, tag inputs) need `fieldMappers`:
 />
 ```
 
-Do **not** pass `transports={["mock"]}` on a real site. Mock is for docs and tests only.
+`className` appends to the default Fill with AI button.
 
-`className` appends to the default Fill with AI button. Keep the default UI unless the user asks for custom styling.
+FormSync is headless. Prefer `useFormSync` (or a `children` render function) and the host design system. Use built-in `FormSyncButton` / modals only when the user does not provide custom components. Theme the default UI with `--fsync-*` CSS variables or `unstyled`.
+
+Do **not** pass `transports={["mock"]}` on a real site. Mock is for docs and tests only.
 
 ## 3. Vanilla
 

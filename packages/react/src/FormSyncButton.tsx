@@ -1,134 +1,116 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import {
-  FormSyncClient,
-  FormSyncError,
-  injectFormSyncStyles,
-  SPARKLE_SVG,
-  type FieldDiff,
-  type FieldMappers,
-  type FilePayload,
-  type FillContext,
-  type JsonSchema,
-  type JsonValue,
-  type TransportPreference,
-} from "@kunalpanchal/formsync-core";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
+import { injectFormSyncStyles, SPARKLE_SVG } from "@kunalpanchal/formsync-core";
 import { ConnectModal, DiffModal } from "./modals.js";
+import {
+  useFormSync,
+  type FormSyncConnectState,
+  type FormSyncController,
+  type FormSyncDiffState,
+  type UseFormSyncOptions,
+} from "./useFormSync.js";
 
-export interface FormSyncButtonProps {
-  schema?: JsonSchema;
-  targetForm: string | HTMLFormElement;
-  context?: FillContext;
-  fieldMappers?: FieldMappers;
-  onSuccess?: (data: Record<string, JsonValue>) => void;
-  onError?: (err: Error) => void;
-  label?: string;
-  requireApproval?: boolean;
-  maxRetries?: number;
-  transports?: TransportPreference[];
-  mockFiller?: (schema: JsonSchema) => Record<string, JsonValue> | Promise<Record<string, JsonValue>>;
-  className?: string;
+export interface FormSyncView extends FormSyncController {
+  label: string;
 }
 
-export function FormSyncButton(props: FormSyncButtonProps): ReactNode {
-  const client = useMemo(
-    () =>
-      new FormSyncClient({
-        transports: props.transports,
-        mockFiller: props.mockFiller,
-      }),
-    [props.transports, props.mockFiller],
-  );
+export interface FormSyncButtonProps extends UseFormSyncOptions {
+  label?: string;
+  className?: string;
+  style?: CSSProperties;
+  /**
+   * Do not inject default CSS. Keep `fsync-*` class names as styling hooks, or
+   * pass `children` / `renderTrigger` and use your own classes.
+   */
+  unstyled?: boolean;
+  /** Replace the default trigger. Connect and diff UI still render unless you override them. */
+  renderTrigger?: (state: FormSyncView) => ReactNode;
+  /** Replace the default missing-host modal. Return null to render nothing. */
+  renderConnect?: (state: FormSyncConnectState) => ReactNode;
+  /** Replace the default approval diff. Return null to render nothing. */
+  renderDiff?: (state: FormSyncDiffState) => ReactNode;
+  /**
+   * Custom trigger content inside the default button, or a render function that
+   * owns the entire UI (trigger + connect + diff).
+   */
+  children?: ReactNode | ((state: FormSyncView) => ReactNode);
+}
 
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState<string>("");
-  const [connectOpen, setConnectOpen] = useState(false);
-  const [connectDetail, setConnectDetail] = useState<string>("");
-  const [diffOpen, setDiffOpen] = useState(false);
-  const [diffs, setDiffs] = useState<FieldDiff[]>([]);
-  const [files, setFiles] = useState<FilePayload[]>([]);
-  const pending = useRef<{
-    resolve: (v: boolean | Record<string, JsonValue>) => void;
-  } | null>(null);
+function isRenderFn(value: FormSyncButtonProps["children"]): value is (state: FormSyncView) => ReactNode {
+  return typeof value === "function";
+}
+
+/**
+ * Default Fill with AI UI. The fill flow itself is headless (`useFormSync`).
+ * Pass `children` as a function, or `renderTrigger` / `renderConnect` / `renderDiff`,
+ * to supply your own components. Omit them to use the built-in button and modals.
+ */
+export function FormSyncButton(props: FormSyncButtonProps): ReactNode {
+  const ctrl = useFormSync(props);
+  const view: FormSyncView = { ...ctrl, label: props.label ?? "Fill with AI" };
+  const useDefaultChrome = !isRenderFn(props.children) && !props.renderTrigger;
 
   useEffect(() => {
+    if (props.unstyled) return;
+    if (isRenderFn(props.children)) return;
     injectFormSyncStyles();
-    return () => client.disconnect();
-  }, [client]);
+  }, [props.unstyled, props.children]);
 
-  async function run() {
-    setBusy(true);
-    setStatus("Connecting…");
-    try {
-      const outcome = await client.fill({
-        targetForm: props.targetForm,
-        schema: props.schema,
-        context: props.context,
-        fieldMappers: props.fieldMappers,
-        maxRetries: props.maxRetries,
-        onProgress: (_stage, message) => setStatus(message),
-        onApprove: async (nextDiffs, values, nextFiles) => {
-          if (props.requireApproval === false) return true;
-          setDiffs(nextDiffs);
-          setFiles(nextFiles);
-          setDiffOpen(true);
-          return await new Promise<boolean | Record<string, JsonValue>>((resolve) => {
-            pending.current = { resolve };
-          });
-        },
-      });
-      props.onSuccess?.(outcome.values);
-      setStatus("Filled");
-    } catch (err) {
-      if (err instanceof FormSyncError && err.code === "NO_HOST") {
-        setConnectDetail(err.message);
-        setConnectOpen(true);
-      } else if (err instanceof FormSyncError && err.code === "REJECTED") {
-        setStatus("Rejected");
-      } else {
-        props.onError?.(err instanceof Error ? err : new Error(String(err)));
-        setStatus("Error");
-      }
-    } finally {
-      setBusy(false);
-    }
+  if (isRenderFn(props.children)) {
+    return <>{props.children(view)}</>;
   }
+
+  const trigger = props.renderTrigger ? (
+    props.renderTrigger(view)
+  ) : (
+    <button
+      type="button"
+      className={
+        props.unstyled
+          ? props.className
+          : `fsync-btn${ctrl.busy ? " fsync-btn--busy" : ""}${props.className ? ` ${props.className}` : ""}`
+      }
+      style={props.style}
+      onClick={ctrl.triggerProps.onClick}
+      disabled={ctrl.triggerProps.disabled}
+      aria-busy={ctrl.triggerProps["aria-busy"]}
+    >
+      {useDefaultChrome && !props.unstyled ? (
+        <span dangerouslySetInnerHTML={{ __html: SPARKLE_SVG }} />
+      ) : null}
+      {props.children ?? (ctrl.busy ? ctrl.status || "Filling…" : view.label)}
+    </button>
+  );
+
+  const connect = props.renderConnect ? (
+    props.renderConnect(ctrl.connect)
+  ) : (
+    <ConnectModal
+      open={ctrl.connect.open}
+      detail={ctrl.connect.detail}
+      onClose={ctrl.connect.close}
+      onRetry={ctrl.connect.retry}
+      unstyled={props.unstyled}
+    />
+  );
+
+  const diff = props.renderDiff ? (
+    props.renderDiff(ctrl.diff)
+  ) : (
+    <DiffModal
+      open={ctrl.diff.open}
+      diffs={ctrl.diff.diffs}
+      files={ctrl.diff.files}
+      onCancel={ctrl.diff.cancel}
+      onConfirm={ctrl.diff.confirm}
+      unstyled={props.unstyled}
+    />
+  );
 
   return (
     <>
-      <button
-        type="button"
-        className={`fsync-btn${busy ? " fsync-btn--busy" : ""}${props.className ? ` ${props.className}` : ""}`}
-        onClick={() => void run()}
-        disabled={busy}
-        aria-busy={busy}
-      >
-        <span dangerouslySetInnerHTML={{ __html: SPARKLE_SVG }} />
-        {busy ? status || "Filling…" : props.label ?? "Fill with AI"}
-      </button>
-      <ConnectModal
-        open={connectOpen}
-        detail={connectDetail}
-        onClose={() => setConnectOpen(false)}
-        onRetry={() => {
-          setConnectOpen(false);
-          void run();
-        }}
-      />
-      <DiffModal
-        open={diffOpen}
-        diffs={diffs}
-        files={files}
-        onCancel={() => {
-          setDiffOpen(false);
-          pending.current?.resolve(false);
-          pending.current = null;
-        }}
-        onConfirm={(values) => {
-          setDiffOpen(false);
-          pending.current?.resolve(values);
-          pending.current = null;
-        }}
-      />
+      {trigger}
+      {connect}
+      {diff}
     </>
   );
 }

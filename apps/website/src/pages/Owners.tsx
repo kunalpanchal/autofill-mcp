@@ -1,4 +1,5 @@
 import { MCP_CODEX_CONFIG, MCP_JSON_CONFIG, MCP_NPX_COMMAND } from "@kunalpanchal/formsync-core";
+import { FormSyncButton } from "@kunalpanchal/formsync-react";
 import { CodeBlock } from "../components/CodeBlock.js";
 
 const npmrc = `# ~/.npmrc
@@ -53,6 +54,76 @@ const mapperSnippet = `<FormSyncButton
   }}
 />`;
 
+const headlessSnippet = `import { useFormSync } from "@kunalpanchal/formsync-react";
+
+function Fill() {
+  const { triggerProps, busy, status, connect, diff } = useFormSync({
+    targetForm: "#product-hunt-form",
+    schema,
+  });
+  return (
+    <>
+      <button {...triggerProps}>{busy ? status : "Fill with AI"}</button>
+      {connect.open ? <YourConnect {...connect} /> : null}
+      {diff.open ? <YourDiff {...diff} /> : null}
+    </>
+  );
+}`;
+
+const themeSnippet = `:root {
+  --fsync-btn-bg: #14221c;
+  --fsync-btn-fg: #f4f1ea;
+  --fsync-btn-radius: 999px;
+  --fsync-primary: #0f7a62;
+}`;
+
+function StyleDemos() {
+  return (
+    <div className="grid two">
+      <form
+        id="docs-theme-form"
+        className="card theme-preview"
+        onSubmit={(e) => e.preventDefault()}
+      >
+        <p>
+          Default button, themed with <code>--fsync-*</code> variables.
+        </p>
+        <label>
+          Note
+          <input name="note" />
+        </label>
+        <FormSyncButton
+          targetForm="#docs-theme-form"
+          transports={["mock"]}
+          mockFiller={() => ({ note: "Filled with a themed default button" })}
+        />
+      </form>
+      <form id="docs-custom-form" className="card" onSubmit={(e) => e.preventDefault()}>
+        <p>Your button. Same headless fill flow, no FormSync chrome.</p>
+        <label>
+          Note
+          <input name="note" />
+        </label>
+        <FormSyncButton
+          targetForm="#docs-custom-form"
+          transports={["mock"]}
+          mockFiller={() => ({ note: "Filled with a host button" })}
+          renderTrigger={(s) => (
+            <button
+              type="button"
+              className="custom-fill"
+              onClick={s.fill}
+              disabled={s.busy}
+            >
+              {s.busy ? s.status || "Filling..." : "Use my button"}
+            </button>
+          )}
+        />
+      </form>
+    </div>
+  );
+}
+
 export function Owners() {
   return (
     <article>
@@ -95,6 +166,24 @@ curl -fsSL https://raw.githubusercontent.com/kunalpanchal/autofill-mcp/main/.age
       <p>
         Omit <code>schema</code> to let <code>@kunalpanchal/formsync-core</code> infer one from{" "}
         <code>name</code>, <code>id</code>, labels, placeholders, and <code>aria-label</code>.
+      </p>
+
+      <h2>Bring your own UI</h2>
+      <p>
+        The fill flow is headless. Built-in button and modals are a fallback when you do not pass
+        your own components. Theme the default control, or render yours.
+      </p>
+      <StyleDemos />
+      <p>
+        <code>useFormSync</code> renders nothing. Pair it with your design system:
+      </p>
+      <CodeBlock code={headlessSnippet} />
+      <p>Or keep the default button and restyle it:</p>
+      <CodeBlock code={themeSnippet} />
+      <p>
+        <code>unstyled</code> skips injecting default CSS. Class names such as{" "}
+        <code>fsync-btn</code> stay as hooks. Vanilla: <code>::part(button)</code>,{" "}
+        <code>unstyled</code>, or <code>headless</code> plus <code>element.fill()</code>.
       </p>
 
       <h2>Vanilla / custom element</h2>

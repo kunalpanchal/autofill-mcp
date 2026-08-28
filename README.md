@@ -59,6 +59,8 @@ import { FormSyncButton } from "@kunalpanchal/formsync-react";
 
 If you omit `schema`, `@kunalpanchal/formsync-core` infers one from `name`, `id`, placeholders, `aria-label`, and `<label>` text.
 
+The React package is headless (`useFormSync`). `FormSyncButton` is the default UI when you do not pass `children`, `renderTrigger`, `renderConnect`, or `renderDiff`. Theme that default with `--fsync-*` CSS variables, or set `unstyled`. See [docs/INTEGRATION.md](docs/INTEGRATION.md).
+
 Vanilla:
 
 ```html
@@ -115,8 +117,8 @@ Wire format: [docs/PROTOCOL.md](docs/PROTOCOL.md). Threat model: [docs/SECURITY.
 | Package | Role |
 | --- | --- |
 | [`@kunalpanchal/formsync-core`](packages/core) | Schema inference, Ajv validation, DOM binder, JSON-RPC 2.0 client |
-| [`@kunalpanchal/formsync-react`](packages/react) | `<FormSyncButton />`, approval diff, missing-host modal |
-| [`@kunalpanchal/formsync-web`](packages/web) | `<form-sync-button>` custom element and `data-formsync` auto-init |
+| [`@kunalpanchal/formsync-react`](packages/react) | Headless `useFormSync` plus optional button, approval diff, missing-host modal |
+| [`@kunalpanchal/formsync-web`](packages/web) | `<form-sync-button>` (CSS parts, `unstyled` / `headless`) and `data-formsync` auto-init |
 | [`@kunalpanchal/formsync-mcp-server`](packages/mcp-server) | Local host: stdio MCP + `ws://127.0.0.1:3737` |
 | [`apps/demo`](apps/demo) | Product Hunt, GitHub repo, and job-application showcases |
 

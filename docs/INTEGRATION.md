@@ -39,6 +39,67 @@ export function LaunchForm() {
 
 Omit `schema` to let `@kunalpanchal/formsync-core` infer one from `name`, `id`, labels, placeholders, and `aria-label`.
 
+## Headless UI
+
+The fill flow is headless. `@kunalpanchal/formsync-core` (`FormSyncClient`) and `useFormSync` own schema, transport, validation, and DOM writes. Built-in button and modals are a fallback when you do not pass your own components.
+
+### Your components
+
+```tsx
+import { useFormSync } from "@kunalpanchal/formsync-react";
+
+function Fill({ schema }: { schema: JsonSchema }) {
+  const { triggerProps, busy, status, connect, diff } = useFormSync({
+    schema,
+    targetForm: "#product-hunt-form",
+  });
+  return (
+    <>
+      <button {...triggerProps}>{busy ? status : "Fill with AI"}</button>
+      {connect.open ? (
+        <YourDialog onClose={connect.close} onRetry={connect.retry}>
+          {connect.detail}
+        </YourDialog>
+      ) : null}
+      {diff.open ? (
+        <YourDiff diffs={diff.diffs} onCancel={diff.cancel} onConfirm={diff.confirm} />
+      ) : null}
+    </>
+  );
+}
+```
+
+Same idea as a render function on the default wrapper:
+
+```tsx
+<FormSyncButton targetForm="#product-hunt-form" schema={schema}>
+  {(s) => (
+    <button type="button" className="your-btn" onClick={s.fill} disabled={s.busy}>
+      {s.busy ? s.status : "Fill with AI"}
+    </button>
+  )}
+</FormSyncButton>
+```
+
+`renderTrigger`, `renderConnect`, and `renderDiff` replace one surface at a time. Returning `null` from a render prop skips that surface.
+
+### Theme the default UI
+
+If you keep `FormSyncButton` / `ConnectModal` / `DiffModal`, override CSS variables on a wrapper or `:root`. Class names (`fsync-btn`, `fsync-overlay`, `fsync-card`, …) stay stable.
+
+```css
+:root {
+  --fsync-btn-bg: #14221c;
+  --fsync-btn-fg: #f4f1ea;
+  --fsync-btn-radius: 999px;
+  --fsync-primary: #0f7a62;
+}
+```
+
+`unstyled` skips injecting the default stylesheet so you can style those class names yourself.
+
+## Custom widgets
+
 Custom widgets (Select2, Slate, tag inputs):
 
 ```tsx
@@ -52,6 +113,8 @@ Custom widgets (Select2, Slate, tag inputs):
 
 ## Vanilla / custom element
 
+Default element:
+
 ```html
 <script type="module">
   import { autoInit } from "@kunalpanchal/formsync-web";
@@ -63,6 +126,16 @@ Custom widgets (Select2, Slate, tag inputs):
   <form-sync-button></form-sync-button>
 </form>
 ```
+
+Style with `::part(button)`, `::part(label)`, `::part(status)`, or CSS variables. Slot your own label:
+
+```html
+<form-sync-button>Ask my assistant</form-sync-button>
+```
+
+`unstyled` skips default CSS. `headless` hides the built-in button so you call `element.fill()` from your own control. Cancel `formsync-connect` or `formsync-diff` and then call `approve(values)` / `reject()` to supply your own dialogs.
+
+Fully custom vanilla UIs can skip the element and use `FormSyncClient` from `@kunalpanchal/formsync-core`.
 
 ## Pairing for end users
 

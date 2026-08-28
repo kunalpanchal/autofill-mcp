@@ -51,13 +51,13 @@ export function Home() {
             <td>
               <code>@kunalpanchal/formsync-react</code>
             </td>
-            <td>Fill with AI button, approval diff, missing-host modal</td>
+            <td>Headless useFormSync plus optional button, approval diff, missing-host modal</td>
           </tr>
           <tr>
             <td>
               <code>@kunalpanchal/formsync-web</code>
             </td>
-            <td>Custom element and data-formsync auto-init for vanilla pages</td>
+            <td>Custom element with CSS parts, unstyled/headless modes, and data-formsync auto-init</td>
           </tr>
           <tr>
             <td>

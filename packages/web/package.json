@@ -1,7 +1,7 @@
 {
   "name": "@kunalpanchal/formsync-web",
   "version": "1.0.0",
-  "description": "Vanilla custom elements for FormSync (form-sync-button and data-formsync auto-init).",
+  "description": "Vanilla form-sync-button (default UI, CSS parts, unstyled/headless) and data-formsync auto-init.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",

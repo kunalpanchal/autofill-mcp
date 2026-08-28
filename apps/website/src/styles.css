@@ -194,6 +194,23 @@ table.props { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.props th, table.props td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
 table.props th { color: var(--muted); font-weight: 600; font-size: 12px; }
 
+.custom-fill {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--ink);
+  background: #fff;
+  border-radius: 4px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.theme-preview {
+  --fsync-btn-bg: #14221c;
+  --fsync-btn-fg: #f4f1ea;
+  --fsync-btn-radius: 999px;
+  --fsync-btn-shadow: none;
+}
+
 @media (max-width: 800px) {
   .frame { grid-template-columns: 1fr; }
   .rail {

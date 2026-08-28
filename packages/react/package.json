@@ -1,7 +1,7 @@
 {
   "name": "@kunalpanchal/formsync-react",
   "version": "1.0.0",
-  "description": "React components for FormSync — Fill with AI button, approval diff, and host connect UI.",
+  "description": "Headless React fill controller plus optional Fill with AI button, approval diff, and host connect UI.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
