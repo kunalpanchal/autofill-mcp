@@ -27,7 +27,7 @@ test("shows the connect modal when no AI host is configured", async ({ page }) =
   await expect(page.getByRole("dialog", { name: "No AI host detected" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Claude Desktop" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Codex CLI" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "I've installed it — retry" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "I've installed it. Retry" })).toBeVisible();
 });
 
 test("user can reject suggested values", async ({ page }) => {

@@ -39,7 +39,7 @@ export function ConnectModal(props: {
         <h2 id="fsync-connect-title">No AI host detected</h2>
         <p>
           Install the FormSync MCP host on this computer (one time). Your assistant then fills the
-          form with JSON — it never gets the browser. After installing, click retry and ask Claude,
+          form with JSON. It never gets the browser. After installing, click retry and ask Claude,
           Cursor, or Codex to fill the pending FormSync form.
         </p>
         <ol className="fsync-steps">
@@ -63,7 +63,7 @@ export function ConnectModal(props: {
             Close
           </button>
           <button type="button" className="fsync-primary" onClick={props.onRetry}>
-            I&apos;ve installed it — retry
+            I&apos;ve installed it. Retry
           </button>
         </div>
       </div>
@@ -131,7 +131,7 @@ export function DiffModal(props: {
                     {d.label}
                     {d.error ? <div className="err">{d.error}</div> : null}
                   </td>
-                  <td className="prev">{flattenPreview(d.previous) || "—"}</td>
+                  <td className="prev">{flattenPreview(d.previous) || "-"}</td>
                   <td>
                     <input
                       value={edits[d.field] ?? ""}

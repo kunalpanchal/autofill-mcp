@@ -6,6 +6,8 @@ FormSync is an open-source library and localhost bridge. Site owners add a singl
 
 The assistant never receives raw DOM access, mouse control, or a live browser session.
 
+**Docs and live examples:** [https://kunalpanchal.github.io/autofill-mcp/](https://kunalpanchal.github.io/autofill-mcp/)
+
 ## Packages
 
 | Package | Role |

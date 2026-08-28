@@ -13,6 +13,8 @@
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
     "test:e2e": "pnpm --filter @formsync/demo test:e2e",
+    "docs": "pnpm --filter @formsync/website dev",
+    "docs:build": "GITHUB_PAGES=true pnpm --filter \"@formsync/website...\" build",
     "publish:github": "node scripts/publish-github-packages.mjs",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules"

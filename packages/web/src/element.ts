@@ -127,7 +127,7 @@ export class FormSyncButtonElement extends HTMLElement {
         <p>${escapeHtml(detail)}</p>
         <div class="fsync-actions">
           <button type="button" class="fsync-ghost" data-close>Close</button>
-          <button type="button" class="fsync-primary" data-retry>I've installed it — retry</button>
+          <button type="button" class="fsync-primary" data-retry>I've installed it. Retry</button>
         </div>
       </div>
     `;
@@ -164,7 +164,7 @@ export class FormSyncButtonElement extends HTMLElement {
         <tr>
           <td><input type="checkbox" class="fsync-check" data-field="${d.field}" checked /></td>
           <td>${escapeHtml(d.label)}${d.error ? `<div class="err">${escapeHtml(d.error)}</div>` : ""}</td>
-          <td class="prev">${escapeHtml(flatten(d.previous) || "—")}</td>
+          <td class="prev">${escapeHtml(flatten(d.previous) || "-")}</td>
           <td><input data-edit="${d.field}" value="${escapeAttr(flatten(d.next))}" /></td>
         </tr>`,
         )
