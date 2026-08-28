@@ -1,0 +1,16 @@
+{
+  "name": "formsync-bridge",
+  "version": "1.0.0",
+  "description": "Bridges FormSync page postMessage to the local MCP host on ws://127.0.0.1:3737",
+  "manifest_version": 3,
+  "action": { "default_title": "FormSync" },
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "host_permissions": ["http://127.0.0.1:3737/*", "ws://127.0.0.1:3737/*"]
+}

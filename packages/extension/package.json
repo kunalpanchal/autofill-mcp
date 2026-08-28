@@ -1,0 +1,6 @@
+{
+  "name": "@formsync/extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome MV3 bridge: page postMessage ↔ local FormSync MCP host."
+}
