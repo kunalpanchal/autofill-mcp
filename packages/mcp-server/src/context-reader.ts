@@ -78,6 +78,9 @@ export async function encodeLocalFile(
     ? resolve(process.env.HOME || process.env.USERPROFILE || "", filePath.slice(1))
     : resolve(filePath);
   const realRoot = await realpath(root);
+  if (isSensitivePath(expanded)) {
+    throw new Error(`Refusing to read a sensitive path (${basename(expanded)})`);
+  }
   const info = await stat(expanded);
   if (!info.isFile()) throw new Error(`Not a file: ${expanded}`);
   const realFile = await realpath(expanded);

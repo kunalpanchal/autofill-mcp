@@ -1,5 +1,5 @@
 import { mkdir, symlink, writeFile } from "node:fs/promises";
-import { homedir, tmpdir } from "node:os";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { encodeLocalFile } from "./context-reader.js";
@@ -24,8 +24,12 @@ describe("encodeLocalFile", () => {
   });
 
   it("refuses sensitive paths such as ssh keys", async () => {
-    const ssh = join(homedir(), ".ssh", "id_ed25519");
-    await expect(encodeLocalFile(ssh, tmpdir())).rejects.toThrow(/sensitive|outside the project root/);
+    const root = join(tmpdir(), `formsync-ssh-${Date.now()}`);
+    const sshDir = join(root, ".ssh");
+    await mkdir(sshDir, { recursive: true });
+    const ssh = join(sshDir, "id_ed25519");
+    await writeFile(ssh, "FAKE");
+    await expect(encodeLocalFile(ssh, root)).rejects.toThrow(/sensitive/);
   });
 
   it("refuses a symlink that escapes the project root", async () => {
