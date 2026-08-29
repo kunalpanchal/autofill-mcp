@@ -1,0 +1,48 @@
+{
+  "name": "@kunalpanchal/formsync-mcp-server",
+  "version": "1.0.0",
+  "description": "Local FormSync MCP host: stdio MCP for Claude/Cursor/Codex plus a localhost WebSocket/HTTP bridge for web forms.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "formsync-mcp": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kunalpanchal/autofill-mcp.git",
+    "directory": "packages/mcp-server"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@kunalpanchal/formsync-core": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "ws": "^8.18.2",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/ws": "^8.18.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

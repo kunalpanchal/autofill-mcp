@@ -1,0 +1,26 @@
+{
+  "name": "formsync",
+  "private": true,
+  "version": "1.0.0",
+  "description": "FormSync — fill web forms with a local AI assistant over MCP/WebMCP, without giving the model browser control.",
+  "license": "MIT",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "test": "turbo run test",
+    "test:e2e": "pnpm --filter @formsync/demo test:e2e",
+    "docs": "pnpm --filter @formsync/website dev",
+    "docs:build": "GITHUB_PAGES=true pnpm --filter \"@formsync/website...\" build",
+    "publish:github": "node scripts/publish-github-packages.mjs",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
+}
