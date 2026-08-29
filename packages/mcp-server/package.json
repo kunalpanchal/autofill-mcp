@@ -1,6 +1,6 @@
 {
   "name": "@kunalpanchal/formsync-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Local FormSync MCP host: stdio MCP for Claude/Cursor/Codex plus a localhost WebSocket/HTTP bridge for web forms.",
   "license": "MIT",
   "type": "module",

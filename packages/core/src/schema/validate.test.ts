@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateAgainstSchema } from "./validate.js";
+import { validateAgainstSchema, validateApprovedValues } from "./validate.js";
 import type { JsonSchema } from "../types.js";
 
 const schema: JsonSchema = {
@@ -39,6 +39,18 @@ describe("validateAgainstSchema", () => {
 
   it("rejects missing required fields", () => {
     const result = validateAgainstSchema(schema, { projectName: "Only name" });
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe("validateApprovedValues", () => {
+  it("allows skipping required keys the user did not include", () => {
+    const result = validateApprovedValues(schema, { tagline: "Short enough" });
+    expect(result.ok).toBe(true);
+  });
+
+  it("still rejects included fields that fail the schema", () => {
+    const result = validateApprovedValues(schema, { tagline: "x".repeat(80) });
     expect(result.ok).toBe(false);
   });
 });

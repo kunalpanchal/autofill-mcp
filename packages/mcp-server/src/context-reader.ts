@@ -1,5 +1,5 @@
-import { readFile, stat } from "node:fs/promises";
-import { basename, extname, resolve } from "node:path";
+import { readFile, realpath, stat } from "node:fs/promises";
+import { basename, extname, isAbsolute, relative, resolve } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -45,27 +45,54 @@ export async function readProjectContext(rootDir: string): Promise<Record<string
   return out;
 }
 
+const BLOCKED_DIR_NAMES = new Set([".ssh", ".gnupg", ".aws", ".kube", ".docker"]);
+const BLOCKED_BASENAMES = new Set([
+  "id_rsa",
+  "id_dsa",
+  "id_ecdsa",
+  "id_ed25519",
+  ".netrc",
+  "credentials",
+  "credentials.json",
+]);
+
+function isInsideRoot(root: string, target: string): boolean {
+  const rel = relative(root, target);
+  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+}
+
+function isSensitivePath(target: string): boolean {
+  const parts = target.split(/[/\\]/);
+  const base = basename(target).toLowerCase();
+  if (BLOCKED_BASENAMES.has(base)) return true;
+  if (base === ".env" || base.startsWith(".env.")) return true;
+  return parts.some((part) => BLOCKED_DIR_NAMES.has(part));
+}
+
 export async function encodeLocalFile(
   filePath: string,
   rootDir?: string,
 ): Promise<{ filename: string; mimeType: string; dataUrl: string }> {
+  const root = resolve(rootDir || process.cwd());
   const expanded = filePath.startsWith("~")
     ? resolve(process.env.HOME || process.env.USERPROFILE || "", filePath.slice(1))
     : resolve(filePath);
-  if (rootDir) {
-    const root = resolve(rootDir);
-    if (!expanded.startsWith(root) && !expanded.startsWith(resolve(process.cwd()))) {
-      // still allow absolute paths the user explicitly provided; just ensure it exists
-    }
-  }
+  const realRoot = await realpath(root);
   const info = await stat(expanded);
   if (!info.isFile()) throw new Error(`Not a file: ${expanded}`);
-  if (info.size > 5 * 1024 * 1024) throw new Error(`File too large (max 5MB): ${expanded}`);
-  const buf = await readFile(expanded);
-  const ext = extname(expanded).toLowerCase();
+  const realFile = await realpath(expanded);
+  if (!isInsideRoot(realRoot, realFile)) {
+    throw new Error(`Refusing to read a file outside the project root (${realRoot})`);
+  }
+  if (isSensitivePath(realFile)) {
+    throw new Error(`Refusing to read a sensitive path (${basename(realFile)})`);
+  }
+  if (info.size > 5 * 1024 * 1024) throw new Error(`File too large (max 5MB): ${basename(realFile)}`);
+  const buf = await readFile(realFile);
+  const ext = extname(realFile).toLowerCase();
   const mimeType = MIME[ext] || "application/octet-stream";
   return {
-    filename: basename(expanded),
+    filename: basename(realFile),
     mimeType,
     dataUrl: `data:${mimeType};base64,${buf.toString("base64")}`,
   };

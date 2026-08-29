@@ -2,7 +2,7 @@ export type { JsonSchema, JsonValue, FillContext, FieldMapper, FieldMappers, Fie
 export { FormSyncError } from "./types.js";
 
 export { inferSchemaFromForm, schemaAcceptsFile } from "./schema/infer.js";
-export { validateAgainstSchema, formatValidationErrors } from "./schema/validate.js";
+export { validateAgainstSchema, validateApprovedValues, formatValidationErrors } from "./schema/validate.js";
 export { computeDiff, readCurrentValues, readFieldValue, resolveElement, summarizeDiff } from "./schema/diff.js";
 
 export { applyFormValues, resolveForm } from "./dom/fill.js";

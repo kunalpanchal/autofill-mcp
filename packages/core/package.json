@@ -1,6 +1,6 @@
 {
   "name": "@kunalpanchal/formsync-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Schema inference, DOM binder, and MCP/WebMCP protocol bridge for FormSync.",
   "license": "MIT",
   "type": "module",

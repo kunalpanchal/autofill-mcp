@@ -10,7 +10,7 @@ import { notifyProgress } from "./bridge.js";
 export function createMcpServer(store: SessionStore, rootDir: string): McpServer {
   const server = new McpServer({
     name: "formsync",
-    version: "1.0.0",
+    version: "1.0.1",
   });
 
   server.tool(
@@ -88,7 +88,7 @@ export function createMcpServer(store: SessionStore, rootDir: string): McpServer
 
   server.tool(
     "fill_web_form",
-    "Submit populated JSON for a pending FormSync web form. The browser validates the payload and shows a diff for the user to approve before any DOM writes. For file inputs, pass a local path; the host encodes it as a data URL.",
+    "Submit populated JSON for a pending FormSync web form. The browser validates the payload and shows a diff for the user to approve before any DOM writes. For file inputs, pass a local path that resolves inside the project root; sensitive paths such as .ssh or .env are refused. The host encodes allowed files as data URLs.",
     {
       requestId: z.string(),
       values: z.record(z.unknown()).describe("JSON object matching the form schema"),

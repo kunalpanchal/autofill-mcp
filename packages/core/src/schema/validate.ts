@@ -70,3 +70,15 @@ function toIssue(err: ErrorObject): ValidationIssue {
 export function formatValidationErrors(errors: ValidationIssue[]): string {
   return errors.map((e) => `- ${e.message}`).join("\n");
 }
+
+/**
+ * Validate a (possibly partial) approved payload. Required fields that the user
+ * skipped are not treated as errors; each included field still must match its schema.
+ */
+export function validateApprovedValues(
+  schema: JsonSchema,
+  approved: Record<string, JsonValue>,
+): { ok: true; value: Record<string, JsonValue> } | { ok: false; errors: ValidationIssue[] } {
+  const required = (schema.required ?? []).filter((key) => Object.prototype.hasOwnProperty.call(approved, key));
+  return validateAgainstSchema({ ...schema, required }, approved);
+}

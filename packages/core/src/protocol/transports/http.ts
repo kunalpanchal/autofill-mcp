@@ -90,6 +90,8 @@ export class PostMessageTransport implements ClientTransport {
   private listening = false;
 
   private readonly onMessage = (event: MessageEvent) => {
+    if (event.source !== window) return;
+    if (event.origin !== window.location.origin) return;
     const data = event.data as { channel?: string; jsonrpc?: string } | undefined;
     if (!data || data.channel !== POSTMESSAGE_CHANNEL) return;
     try {
@@ -143,12 +145,12 @@ export class PostMessageTransport implements ClientTransport {
           reject(e);
         },
       });
-      window.postMessage(payload, "*");
+      window.postMessage(payload, window.location.origin);
     });
   }
 
   notify(method: string, params?: unknown): void {
-    window.postMessage({ channel: POSTMESSAGE_CHANNEL, ...makeNotification(method, params) }, "*");
+    window.postMessage({ channel: POSTMESSAGE_CHANNEL, ...makeNotification(method, params) }, window.location.origin);
   }
 
   onNotification(handler: (method: string, params: unknown) => void): () => void {

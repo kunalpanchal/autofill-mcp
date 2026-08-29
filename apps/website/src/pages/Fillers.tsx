@@ -62,11 +62,15 @@ export function Fillers() {
       <ul>
         <li>The JSON Schema (names, types, descriptions, constraints)</li>
         <li>Optional hints from the site, plus page URL and title</li>
-        <li>Local files your MCP host reads, such as package.json and README</li>
+        <li>
+          Local files your MCP host reads, such as package.json and README. Upload paths must stay
+          inside the project root; credential files are refused.
+        </li>
       </ul>
       <p>
         The assistant cannot read arbitrary DOM, click, navigate, or hold your authenticated
-        session. Values are written only after the in-page approval step.
+        session. Values are written only after they pass schema validation and the in-page approval
+        step (unless the embedder skips approval). Invalid JSON is never written.
       </p>
     </article>
   );

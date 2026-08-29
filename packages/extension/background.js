@@ -1,6 +1,9 @@
+import { createTabMaps, forgetTab, rememberTab, tabForHostFrame } from "./route.js";
+
 const CHANNEL = "formsync";
 let socket;
 const pending = [];
+const tabs = createTabMaps();
 
 function connect() {
   if (socket && socket.readyState <= 1) return;
@@ -10,17 +13,24 @@ function connect() {
   });
   socket.addEventListener("message", (event) => {
     const parsed = JSON.parse(String(event.data));
-    chrome.tabs.query({}, (tabs) => {
-      for (const tab of tabs) {
-        if (tab.id) chrome.tabs.sendMessage(tab.id, { channel: CHANNEL, ...parsed });
-      }
+    const tabId = tabForHostFrame(parsed, tabs);
+    if (!tabId) return;
+    chrome.tabs.sendMessage(tabId, { channel: CHANNEL, ...parsed }, () => {
+      void chrome.runtime.lastError;
     });
   });
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.tabs.onRemoved.addListener((tabId) => {
+  forgetTab(tabId, tabs);
+});
+
+chrome.runtime.onMessage.addListener((msg, sender) => {
   if (!msg || msg.channel !== CHANNEL) return;
+  const tabId = sender.tab?.id;
+  if (!tabId) return;
   const { channel: _c, ...rpc } = msg;
+  rememberTab(rpc, tabId, tabs);
   connect();
   const payload = JSON.stringify(rpc);
   if (socket?.readyState === WebSocket.OPEN) socket.send(payload);

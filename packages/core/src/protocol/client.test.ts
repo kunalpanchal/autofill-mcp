@@ -53,6 +53,43 @@ describe("FormSyncClient with mock transport", () => {
     expect(outcome.values.tagline).toBe("short");
   });
 
+  it("throws VALIDATION_FAILED instead of writing invalid values after retries", async () => {
+    document.body.innerHTML = `<form><input name="tagline" maxlength="8" required /></form>`;
+    const form = document.querySelector("form")!;
+    const client = new FormSyncClient({
+      transports: ["mock"],
+      mockDelayMs: 0,
+      mockFiller: () => ({ tagline: "this is way too long for the field" }),
+    });
+    await expect(
+      client.fill({
+        targetForm: form,
+        schema: inferSchemaFromForm(form),
+        maxRetries: 0,
+        onApprove: async () => true,
+      }),
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    expect((form.elements.namedItem("tagline") as HTMLInputElement).value).toBe("");
+  });
+
+  it("throws VALIDATION_FAILED when requireApproval is skipped and values stay invalid", async () => {
+    document.body.innerHTML = `<form><input name="tagline" maxlength="8" required /></form>`;
+    const form = document.querySelector("form")!;
+    const client = new FormSyncClient({
+      transports: ["mock"],
+      mockDelayMs: 0,
+      mockFiller: () => ({ tagline: "this is way too long for the field" }),
+    });
+    await expect(
+      client.fill({
+        targetForm: form,
+        schema: inferSchemaFromForm(form),
+        maxRetries: 0,
+      }),
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    expect((form.elements.namedItem("tagline") as HTMLInputElement).value).toBe("");
+  });
+
   it("throws NO_HOST when no transports are available", async () => {
     document.body.innerHTML = `<form><input name="n" /></form>`;
     const client = new FormSyncClient({ transports: [] });
