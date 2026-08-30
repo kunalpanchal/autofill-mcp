@@ -11,7 +11,7 @@ import { FormSyncError } from "../types.js";
 import { NO_HOST_MESSAGE } from "../install.js";
 import { computeDiff, readCurrentValues } from "../schema/diff.js";
 import { inferSchemaFromForm } from "../schema/infer.js";
-import { formatValidationErrors, validateAgainstSchema } from "../schema/validate.js";
+import { formatValidationErrors, validateAgainstSchema, validateApprovedValues } from "../schema/validate.js";
 import { applyFormValues, resolveForm } from "../dom/fill.js";
 import { METHODS } from "./constants.js";
 import { detectAndConnect, waitForFillResult } from "./handshake.js";
@@ -156,10 +156,11 @@ export class FormSyncClient {
         break;
       }
       if (attempt >= maxRetries) {
-        options.onProgress?.(
-          "invalid",
-          `Validation still failing after retries:\n${formatValidationErrors(check.errors)}`,
-        );
+        const message = `Validation still failing after retries:\n${formatValidationErrors(check.errors)}`;
+        options.onProgress?.("invalid", message);
+        if (!options.onApprove) {
+          throw new FormSyncError("VALIDATION_FAILED", message);
+        }
         break;
       }
       attempt += 1;
@@ -193,6 +194,12 @@ export class FormSyncClient {
       }
       if (decision !== true) approved = decision;
     }
+
+    const approvedCheck = validateApprovedValues(schema, approved);
+    if (!approvedCheck.ok) {
+      throw new FormSyncError("VALIDATION_FAILED", formatValidationErrors(approvedCheck.errors));
+    }
+    approved = approvedCheck.value;
 
     options.onProgress?.("apply", "Writing approved values into the form…");
     await applyFormValues(form, approved, { mappers: options.fieldMappers, files, schema });

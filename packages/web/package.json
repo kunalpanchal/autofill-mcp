@@ -1,6 +1,6 @@
 {
   "name": "@kunalpanchal/formsync-web",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vanilla form-sync-button (default UI, CSS parts, unstyled/headless) and data-formsync auto-init.",
   "license": "MIT",
   "type": "module",

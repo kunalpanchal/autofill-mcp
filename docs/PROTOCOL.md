@@ -117,9 +117,9 @@ When Claude Desktop, Cursor, or Codex launches `npx -y --registry=https://npm.pk
 - `list_pending_forms`
 - `get_form_schema`
 - `read_project_context`
-- `fill_web_form` — `{ requestId, values, files? }`
+- `fill_web_form`: `{ requestId, values, files? }`. `files[].path` must resolve inside the MCP workspace root; sensitive paths are refused.
 - `reject_web_form`
 
 Prompt: `fill_pending_form`.
 
-Local file contents are only sent to the MCP host (the user's assistant). The browser receives field values and optional data URLs for file inputs — never a live filesystem.
+Local file contents are only sent to the MCP host (the user's assistant). The browser receives field values and optional data URLs for file inputs, never a live filesystem.

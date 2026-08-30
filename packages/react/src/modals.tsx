@@ -169,6 +169,11 @@ export function DiffModal(props: {
           <button
             type="button"
             className="fsync-primary"
+            disabled={props.diffs.some((d) => {
+              if (!(included[d.field] ?? true) || !d.error) return false;
+              const raw = edits[d.field] ?? flattenPreview(d.next);
+              return raw === flattenPreview(d.next);
+            })}
             onClick={() => {
               const values: Record<string, JsonValue> = {};
               for (const d of props.diffs) {

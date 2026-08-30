@@ -78,6 +78,11 @@ jobs:
         env:
           GITHUB_PAGES: "true"
       - uses: actions/configure-pages@v5
+        with:
+          # First main deploy 404s unless a Pages site exists. This creates one
+          # with Source = GitHub Actions when the token is allowed to. If it
+          # still fails, set that once under Settings → Pages.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: apps/website/dist
